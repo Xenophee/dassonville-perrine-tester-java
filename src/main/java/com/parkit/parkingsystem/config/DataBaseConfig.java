@@ -13,7 +13,7 @@ public class DataBaseConfig {
         logger.info("Create DB connection");
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/prod","prod_user","prod");
+                "jdbc:mysql://localhost:3306/prod?serverTimezone=Europe/Paris","prod_user","prod");
     }
 
     public void closeConnection(Connection con){
