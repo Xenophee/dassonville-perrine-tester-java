@@ -26,8 +26,8 @@ insert into parking(PARKING_NUMBER,AVAILABLE,TYPE) values(5,true,'BIKE');
 commit;
 
 /* Setting up TEST DB */
-create database test;
-use test;
+create database prod_test;
+use prod_test;
 
 create table parking(
 PARKING_NUMBER int PRIMARY KEY,
