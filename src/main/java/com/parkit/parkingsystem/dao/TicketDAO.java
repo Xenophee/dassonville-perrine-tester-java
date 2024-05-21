@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 
+/**
+ * The TicketDAO class is responsible for managing database operations related to tickets.
+ */
 public class TicketDAO {
 
     private static final Logger logger = LogManager.getLogger("TicketDAO");
@@ -37,6 +40,12 @@ public class TicketDAO {
 //        }
 //    }
 
+    /**
+     * This method is used to save a ticket in the database.
+     *
+     * @param ticket The ticket to be saved.
+     * @return A boolean indicating whether the operation was successful.
+     */
     public boolean saveTicket(Ticket ticket) {
         try (
                 Connection con = dataBaseConfig.getConnection();
@@ -78,6 +87,12 @@ public class TicketDAO {
 //        }
 //    }
 
+    /**
+     * This method is used to get the number of tickets associated with a vehicle registration number.
+     *
+     * @param vehicleRegNumber The vehicle's registration number.
+     * @return The number of tickets associated with the vehicle's registration number.
+     */
     public int getNbTicket(String vehicleRegNumber) {
         int nbTickets = 0;
         try (
@@ -127,6 +142,12 @@ public class TicketDAO {
 //        }
 //    }
 
+    /**
+     * This method is used to get a ticket from a vehicle's registration number.
+     *
+     * @param vehicleRegNumber The vehicle's registration number.
+     * @return The ticket associated with the vehicle's registration number.
+     */
     public Ticket getTicket(String vehicleRegNumber) {
         Ticket ticket = null;
         try (
@@ -174,6 +195,12 @@ public class TicketDAO {
 //        return false;
 //    }
 
+    /**
+     * This method is used to update a ticket in the database.
+     *
+     * @param ticket The ticket to be updated.
+     * @return A boolean indicating whether the operation was successful.
+     */
     public boolean updateTicket(Ticket ticket) {
         try (
                 Connection con = dataBaseConfig.getConnection();

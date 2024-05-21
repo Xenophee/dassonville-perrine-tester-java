@@ -9,6 +9,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 
+/**
+ * This class is responsible for managing the parking spot data access operations.
+ */
 public class ParkingSpotDAO {
     private static final Logger logger = LogManager.getLogger("ParkingSpotDAO");
 
@@ -36,6 +39,13 @@ public class ParkingSpotDAO {
 //        return result;
 //    }
 
+    /**
+     * This method is used to get the next available parking slot.
+     *
+     * @param parkingType The type of the parking spot.
+     * @return An integer representing the next available parking slot.
+     * @throws Exception If an error occurs while fetching the parking number from the database.
+     */
     public int getNextAvailableSlot(ParkingType parkingType) throws Exception {
         int result = -1;
         try (
@@ -72,8 +82,13 @@ public class ParkingSpotDAO {
 //            dataBaseConfig.closeConnection(con);
 //        }
 
+    /**
+     * This method is used to update the availability of a parking spot.
+     *
+     * @param parkingSpot The parking spot to be updated.
+     * @return A boolean indicating whether the update was successful.
+     */
     public boolean updateParking(ParkingSpot parkingSpot) {
-        // update the availability of that parking slot
         try (
                 Connection connection = dataBaseConfig.getConnection();
                 PreparedStatement statement = connection.prepareStatement(DBConstants.UPDATE_PARKING_SPOT)

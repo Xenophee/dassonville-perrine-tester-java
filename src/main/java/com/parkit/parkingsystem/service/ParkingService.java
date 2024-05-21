@@ -15,7 +15,9 @@ import static com.parkit.parkingsystem.constants.Discount.MINIMUM_VISITS_FOR_DIS
 import static com.parkit.parkingsystem.util.ConsoleColorsUtil.*;
 import static com.parkit.parkingsystem.util.DatesUtil.formatDate;
 
-
+/**
+ * This class is responsible for managing the parking service.
+ */
 public class ParkingService {
 
     private static final Logger logger = LogManager.getLogger("ParkingService");
@@ -26,16 +28,36 @@ public class ParkingService {
     private final ParkingSpotDAO parkingSpotDAO;
     private final TicketDAO ticketDAO;
 
+    /**
+     * Constructor for ParkingService.
+     *
+     * @param inputReaderUtil An instance of InputReaderUtil.
+     * @param parkingSpotDAO  An instance of ParkingSpotDAO.
+     * @param ticketDAO       An instance of TicketDAO.
+     */
     public ParkingService(InputReaderUtil inputReaderUtil, ParkingSpotDAO parkingSpotDAO, TicketDAO ticketDAO) {
         this.inputReaderUtil = inputReaderUtil;
         this.parkingSpotDAO = parkingSpotDAO;
         this.ticketDAO = ticketDAO;
     }
 
+    /**
+     * This method is used to process incoming vehicles.
+     * <p>
+     * It performs the following operations:
+     * <ul>
+     *     <li>It gets the next available parking spot with {@link #getNextParkingNumberIfAvailable()}.</li>
+     *     <li>It gets the vehicle registration number with {@link #getVehicleRegNumber()}.</li>
+     *     <li>It updates the parking spot's availability with {@link ParkingSpotDAO#updateParking(ParkingSpot)}.</li>
+     *     <li>It saves the ticket information with {@link TicketDAO#saveTicket(Ticket)}.</li>
+     *     <li>If the vehicle is a recurring user, it displays a message for announcing the discount.</li>
+     *     <li>It displays the parking spot number and the in-time.</li>
+     * </ul>
+     */
     public void processIncomingVehicle() {
         try {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
-            if (parkingSpot != null && parkingSpot.getId() > 0) {
+            if (parkingSpot != null) {
                 String vehicleRegNumber = getVehicleRegNumber();
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
@@ -64,20 +86,36 @@ public class ParkingService {
         }
     }
 
+    /**
+     * This method is used to get the vehicle registration number.
+     *
+     * @return A string representing the vehicle registration number.
+     * @throws Exception If an error occurs while reading the vehicle registration number.
+     */
     private String getVehicleRegNumber() throws Exception {
         System.out.println("\nPlease type the vehicle registration number and press enter key");
         return inputReaderUtil.readVehicleRegistrationNumber();
     }
 
+    /**
+     * This method is used to get the next available parking number.
+     * It calls the following methods:
+     * <ul>
+     *     <li>{@link #getVehicleType()} to get the type of the vehicle.</li>
+     *     <li>{@link ParkingSpotDAO#getNextAvailableSlot(ParkingType)} to get the next available parking slot.</li>
+     * </ul>
+     *
+     * @return An instance of ParkingSpot representing the next available parking spot.
+     */
     public ParkingSpot getNextParkingNumberIfAvailable() {
         int parkingNumber = 0;
         ParkingSpot parkingSpot = null;
         try {
             ParkingType parkingType = getVehicleType();
             parkingNumber = parkingSpotDAO.getNextAvailableSlot(parkingType);
-            if(parkingNumber > 0){
-                parkingSpot = new ParkingSpot(parkingNumber,parkingType, true);
-            }else{
+            if (parkingNumber > 0) {
+                parkingSpot = new ParkingSpot(parkingNumber, parkingType, true);
+            } else {
                 throw new Exception("Error fetching parking number from DB. Parking slots might be full");
             }
         } catch (IllegalArgumentException ie) {
@@ -88,7 +126,14 @@ public class ParkingService {
         return parkingSpot;
     }
 
-    private ParkingType getVehicleType() {
+    /**
+     * This method is used to displays a menu to the user to select the vehicle type.
+     * It reads the user's selection with {@link InputReaderUtil#readSelection()}.
+     *
+     * @return An instance of ParkingType representing the type of the vehicle based on the user's selection.
+     * @throws IllegalArgumentException If an invalid input is provided.
+     */
+    public ParkingType getVehicleType() {
         System.out.println("\nPlease select vehicle type from menu");
         System.out.println(colorString("1 CAR", PURPLE));
         System.out.println(colorString("2 BIKE", PURPLE));
@@ -107,6 +152,19 @@ public class ParkingService {
         }
     }
 
+    /**
+     * This method is used to process exiting vehicles.
+     * It performs the following operations:
+     * <ul>
+     *     <li>It gets the vehicle registration number with {@link #getVehicleRegNumber()}.</li>
+     *     <li>It gets the ticket information with {@link TicketDAO#getTicket(String)}.</li>
+     *     <li>It calculates the fare with {@link FareCalculatorService#calculateFare(Ticket, boolean)}.</li>
+     *     <li>It updates the ticket information with {@link TicketDAO#updateTicket(Ticket)}.</li>
+     *     <li>It updates the parking spot's availability with {@link ParkingSpotDAO#updateParking(ParkingSpot)}.</li>
+     *     <li>If the parking fare is 0, it displays a message to inform the user that the parking time is less than 30 minutes.</li>
+     *     <li>It displays the parking fare to pay and the out-time.</li>
+     * </ul>
+     */
     public void processExitingVehicle() {
         try {
             String vehicleRegNumber = getVehicleRegNumber();
@@ -114,11 +172,8 @@ public class ParkingService {
             LocalDateTime outTime = LocalDateTime.now();
             ticket.setOutTime(outTime);
 
-            if ((ticketDAO.getNbTicket(vehicleRegNumber) > MINIMUM_VISITS_FOR_DISCOUNT)) {
-                fareCalculatorService.calculateFare(ticket, true);
-            } else {
-                fareCalculatorService.calculateFare(ticket);
-            }
+            boolean discount = ticketDAO.getNbTicket(vehicleRegNumber) > MINIMUM_VISITS_FOR_DISCOUNT;
+            fareCalculatorService.calculateFare(ticket, discount);
 
             if (ticketDAO.updateTicket(ticket)) {
                 ParkingSpot parkingSpot = ticket.getParkingSpot();
@@ -134,7 +189,7 @@ public class ParkingService {
                 System.out.println("Recorded out-time for vehicle number : " + colorString(ticket.getVehicleRegNumber(), BLUE) + " is : " + colorString(formatDate(outTime), BLUE));
 
             } else {
-                System.out.println("Unable to update ticket information. Error occurred");
+                System.err.println("Unable to update ticket information. Error occurred");
             }
         } catch (Exception e) {
             logger.error("Unable to process exiting vehicle", e);

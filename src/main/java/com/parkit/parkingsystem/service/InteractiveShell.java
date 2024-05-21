@@ -8,10 +8,16 @@ import org.apache.logging.log4j.Logger;
 
 import static com.parkit.parkingsystem.util.ConsoleColorsUtil.*;
 
+/**
+ * This class is responsible for managing the interactive shell.
+ */
 public class InteractiveShell {
 
     private static final Logger logger = LogManager.getLogger("InteractiveShell");
 
+    /**
+     * This method is used to load the interface.
+     */
     public static void loadInterface(){
         logger.info("App initialized!!!");
         System.out.println(colorString(" WELCOME TO PARKING SYSTEM ! ", PURPLE_BACKGROUND, BLACK_BOLD));
@@ -44,6 +50,9 @@ public class InteractiveShell {
         }
     }
 
+    /**
+     * This method is used to load the menu.
+     */
     private static void loadMenu(){
         System.out.println("\n\n--------------------------------------------------");
         System.out.println("Please select an option. Simply enter the number to choose an action");
