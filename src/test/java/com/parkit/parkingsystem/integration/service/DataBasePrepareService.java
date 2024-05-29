@@ -1,12 +1,11 @@
 package com.parkit.parkingsystem.integration.service;
 
-import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
-import com.parkit.parkingsystem.model.Ticket;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
+import java.sql.*;
+import java.time.LocalDateTime;
+
+import static com.parkit.parkingsystem.constants.Fare.CAR_RATE_PER_HOUR;
 
 public class DataBasePrepareService {
 
@@ -30,18 +29,65 @@ public class DataBasePrepareService {
         }
     }
 
-    public void updateInTimeTicket(Ticket ticket) {
+    public void insertACar(int minusHour) {
+        LocalDateTime inTime = LocalDateTime.now().minusHours(minusHour);
+
         try (
                 Connection con = dataBaseTestConfig.getConnection();
-                PreparedStatement ps = con.prepareStatement("update ticket set IN_TIME=? where ID=?")
+                Statement stmt = con.createStatement();
         ) {
-            ps.setTimestamp(1, Timestamp.valueOf(ticket.getInTime()));
-            ps.setInt(2, ticket.getId());
-            ps.execute();
+            String sql = String.format(
+                    "insert into ticket(PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME) values(%d, '%s', %d, '%s', %s)",
+                    1,
+                    "ABCDEF",
+                    0,
+                    inTime,
+                    "NULL"
+            );
+            stmt.execute(sql);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
+    public void updateACarExit() {
+        LocalDateTime outTime = LocalDateTime.now();
+
+        try (
+                Connection con = dataBaseTestConfig.getConnection();
+                Statement stmt = con.createStatement();
+        ) {
+            String sql = String.format(
+                    "update ticket set PRICE= %s, OUT_TIME= '%s' where ID= %d",
+                    CAR_RATE_PER_HOUR,
+                    outTime,
+                    1
+            );
+            stmt.execute(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Boolean getParkingSpotAvailableStatus() {
+        Boolean isAvailable = null;
+
+        try (
+                Connection con = dataBaseTestConfig.getConnection();
+                Statement stmt = con.createStatement();
+        ) {
+            String sql = String.format(
+                    "select AVAILABLE from parking where PARKING_NUMBER = %d",
+                    1
+            );
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                isAvailable = rs.getBoolean("AVAILABLE");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return isAvailable;
+    }
 }
