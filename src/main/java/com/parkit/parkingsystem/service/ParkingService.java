@@ -121,6 +121,7 @@ public class ParkingService {
         } catch (IllegalArgumentException ie) {
             logger.error("Error parsing user input for type of vehicle", ie);
         } catch (Exception e) {
+            System.err.println("Parking slots might be full. Please try again later.");
             logger.error("Error fetching next available parking slot", e);
         }
         return parkingSpot;
@@ -146,7 +147,7 @@ public class ParkingService {
                 return ParkingType.BIKE;
             }
             default: {
-                System.out.println("Incorrect input provided");
+                System.err.println("Incorrect input provided");
                 throw new IllegalArgumentException("Entered input is invalid");
             }
         }
@@ -169,6 +170,12 @@ public class ParkingService {
         try {
             String vehicleRegNumber = getVehicleRegNumber();
             Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
+
+            if (ticket == null) {
+                System.err.println("No ticket found for vehicle registration number: " + vehicleRegNumber);
+                return;
+            }
+
             LocalDateTime outTime = LocalDateTime.now();
             ticket.setOutTime(outTime);
 
