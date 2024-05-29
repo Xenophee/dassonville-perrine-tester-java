@@ -1,49 +1,68 @@
-# Parking System
-A command line app for managing the parking system. 
-This app uses Java to run and stores the data in Mysql DB.
 
-## Getting Started
+# Projet Etudiant Openclassrooms n°2 – Testez une application Java
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+<img src="/preview.jpg" alt="Logo de l'application">
 
-### Prerequisites
+<h1 align="center">Park'It - Parking System</h1>
 
-What things you need to install the software and how to install them
+<br>
+Park'It est une application de gestion de parking qui permet de gérer les entrées et sorties des véhicules dans un parking.
 
-- Java 1.8
-- Maven 3.6.2
-- Mysql 8.0.17
+## Fonctionnalités
 
-### Installing
+- Gestion des entrées et sorties des véhicules (voitures, motos)
+- Calcul automatique des frais de stationnement en fonction de la durée du stationnement
+- Gestion des places de parking disponibles
+- Prise en charge des utilisateurs récurrents avec des tarifs réduits
 
-A step by step series of examples that tell you how to get a development env running:
+## Prérequis
 
-1.Install Java:
+- Java 8 ou supérieur
+- Maven
+- Un système de gestion de base de données MySQL
 
-https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html
+## Installation
 
-2.Install Maven:
+1. Clonez le dépôt GitHub sur votre machine locale en utilisant la commande suivante :
 
-https://maven.apache.org/install.html
+```bash
+git clone https://github.com/Xenophee/dassonville-perrine-tester-java.git
+```
 
-3.Install MySql:
+2. Importer le projet dans votre IDE.
 
-https://dev.mysql.com/downloads/mysql/
+3. Configurez votre base de données SQL. Créez une nouvelle base de données et exécutez le script SQL fourni dans le répertoire `resources` pour créer les tables nécessaires.
 
-After downloading the mysql 8 installer and installing it, you will be asked to configure the password for the default `root` account.
-This code uses the default root account to connect and the password can be set as `rootroot`. If you add another user/credentials make sure to change the same in the code base.
+4. Mettez à jour le fichier `src/main/java/com.parkit.parkingsystem/config/DataBaseConfig` avec les informations de connexion à votre base de données.
 
-### Running App
+5. Faites de même pour le fichier `src/test/java/com.parkit.parkingsystem/config/DataBaseConfigTest` pour les tests.
 
-Post installation of MySQL, Java and Maven, you will have to set up the tables and data in the data base.
-For this, please run the sql commands present in the `Data.sql` file under the `resources` folder in the code base.
+6. Exécutez le fichier `App.java` pour lancer l'application.
 
-Finally, you will be ready to import the code into an IDE of your choice and run the App.java to launch the application.
 
-### Testing
 
-The app has unit tests and integration tests written. More of these need to be added and in some places that can be seen mentioend as `TODO` comments. The existing tests need to be triggered from maven-surefire plugin while we try to generate the final executable jar file.
+## Tests
 
-To run the tests from maven, go to the folder that contains the pom.xml file and execute the below command.
+Les tests peuvent être exécutés en utilisant la commande suivante :
 
-`mvn test`
+```bash
+mvn test
+```
+Les rapports de test seront générés dans le répertoire `target/surefire-reports`.
+
+<br>
+
+Pour obtenir un rapport de test en html, exécutez la commande suivante :
+```bash
+mvn surefire-report:report
+```
+Le résultat sera dans le répertoire `target/site/surefire-report.html`.
+
+<br>
+
+Pour vérifier la couverture des tests, exécutez la commande suivante :
+```bash
+mvn verify
+```
+
+Le résultat de la couverture des tests sera généré dans le répertoire `target/site/jacoco/index.html`.
