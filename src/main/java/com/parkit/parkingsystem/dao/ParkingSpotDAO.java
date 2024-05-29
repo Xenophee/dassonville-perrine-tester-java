@@ -58,7 +58,7 @@ public class ParkingSpotDAO {
                     result = rs.getInt(1);
                 }
             }
-        } catch (SQLException | ClassNotFoundException ex) {
+        } catch (SQLException ex) {
             throw new Exception("Error fetching parking number from DB. Parking slots might be full");
         }
         return result;
