@@ -12,12 +12,15 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ParkingDataBaseIT {
 
     private static final DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
@@ -30,7 +33,7 @@ public class ParkingDataBaseIT {
     private static InputReaderUtil inputReaderUtil;
 
     @BeforeAll
-    public static void setUp() throws Exception {
+    public static void setUp() {
         parkingSpotDAO = new ParkingSpotDAO();
         parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
         ticketDAO = new TicketDAO();
@@ -46,7 +49,7 @@ public class ParkingDataBaseIT {
     }
 
     @AfterEach
-    public void printTestDivider() {
+    public void printDividerPerTest() {
         System.out.println("\n******************************************************************");
     }
 
@@ -61,10 +64,10 @@ public class ParkingDataBaseIT {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
 
-        // Récupérer le ticket de la base de données
+        // Récupère le ticket de la base de données
         Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
 
-        // Vérifier que le ticket est bien enregistré dans la base de données
+        // Vérifie que le ticket est bien enregistré dans la base de données
         assertThat(ticket).isNotNull();
         assertThat(ticket.getParkingSpot().getId()).isInstanceOf(Integer.class);
         assertThat(ticket.getVehicleRegNumber()).isEqualTo(vehicleRegNumber);
@@ -72,51 +75,51 @@ public class ParkingDataBaseIT {
         assertThat(ticket.getInTime()).isNotNull();
         assertThat(ticket.getOutTime()).isNull();
 
-        // Vérifier que la disponibilité du parking est mise à jour correctement
-        assertThat(ticket.getParkingSpot().isAvailable()).isFalse();
+        // Vérifie que la disponibilité du parking est mise à jour correctement
+        boolean parkingSpotFree = dataBasePrepareService.getParkingSpotAvailableStatus();
+        assertThat(parkingSpotFree).isFalse();
     }
 
 
     @Test
     public void testParkingLotExit() {
-        testParkingACar();
-
-        // Récupération du ticket de la base de données et modification de l'heure d'entrée
-        Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
-        ticket.setInTime(ticket.getInTime().minusHours(1));
-        dataBasePrepareService.updateInTimeTicket(ticket);
+        dataBasePrepareService.insertACar(1);
 
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processExitingVehicle();
 
-        // Récupérer le ticket final de la base de données
-        ticket = ticketDAO.getTicket(vehicleRegNumber);
+        // Récupère le ticket de la base de données
+        Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
 
-        // Vérifier que le ticket est bien mis à jour dans la base de données
+        // Vérifie que le ticket est bien mis à jour dans la base de données
         assertThat(ticket).isNotNull();
         assertThat(ticket.getOutTime()).isAfter(ticket.getInTime());
         assertThat(ticket.getPrice()).isPositive();
+
+        // Vérifie que la disponibilité du parking est mise à jour correctement
+        boolean parkingSpotFree = dataBasePrepareService.getParkingSpotAvailableStatus();
+        assertThat(parkingSpotFree).isTrue();
     }
 
     @Test
     public void testParkingLotExitRecurringUser() {
-        testParkingLotExit();
-        testParkingACar();
+        dataBasePrepareService.insertACar(2);
+        dataBasePrepareService.updateACarExit();
 
-        // Récupération du ticket de la base de données et modification de l'heure d'entrée
-        Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
-        ticket.setInTime(ticket.getInTime().minusHours(1));
-        dataBasePrepareService.updateInTimeTicket(ticket);
-
+        dataBasePrepareService.insertACar(1);
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processExitingVehicle();
 
-        // Récupérer le ticket final de la base de données
-        ticket = ticketDAO.getTicket(vehicleRegNumber);
+        // Récupère le ticket de la base de données
+        Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
 
-        // Vérifier que le ticket est bien mis à jour dans la base de données
+        // Vérifie que le ticket est bien mis à jour dans la base de données
         assertThat(ticket).isNotNull();
         assertThat(ticket.getOutTime()).isAfter(ticket.getInTime());
         assertThat(ticket.getPrice()).isLessThan(Fare.CAR_RATE_PER_HOUR);
+
+        // Vérifie que la disponibilité du parking est mise à jour correctement
+        boolean parkingSpotFree = dataBasePrepareService.getParkingSpotAvailableStatus();
+        assertThat(parkingSpotFree).isTrue();
     }
 }
